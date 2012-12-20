@@ -34,13 +34,14 @@ struct _BloomFilter
    guint8     data[0];
 };
 
-GType        bloom_filter_get_type (void) G_GNUC_CONST;
-BloomFilter *bloom_filter_new      (gsize        width,
-                                    guint        n_hash_funcs,
-                                    GHashFunc    first_hash_func,
-                                    ...);
-BloomFilter *bloom_filter_ref      (BloomFilter *filter);
-void         bloom_filter_unref    (BloomFilter *filter);
+void         bloom_filter_remove_all (BloomFilter *filter);
+GType        bloom_filter_get_type   (void) G_GNUC_CONST;
+BloomFilter *bloom_filter_new        (gsize        width,
+                                      guint        n_hash_funcs,
+                                      GHashFunc    first_hash_func,
+                                      ...);
+BloomFilter *bloom_filter_ref        (BloomFilter *filter);
+void         bloom_filter_unref      (BloomFilter *filter);
 
 G_INLINE_FUNC gboolean
 bloom_filter_get_bit (BloomFilter *filter,

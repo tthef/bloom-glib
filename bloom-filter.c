@@ -17,6 +17,7 @@
  */
 
 #include <limits.h>
+#include <string.h>
 
 #include "bloom-filter.h"
 
@@ -47,6 +48,13 @@ bloom_filter_new (gsize     width,
    va_end(args);
 
    return filter;
+}
+
+void
+bloom_filter_remove_all (BloomFilter *filter)
+{
+   g_return_if_fail(filter);
+   memset(filter->data, 0, (filter->width / CHAR_BIT) + 1);
 }
 
 BloomFilter *

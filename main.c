@@ -37,6 +37,12 @@ test1 (void)
       g_assert(bloom_filter_contains(filter, strings[i]));
    }
 
+   bloom_filter_remove_all(filter);
+
+   for (i = 0; i < G_N_ELEMENTS(strings); i++) {
+      g_assert(!bloom_filter_contains(filter, strings[i]));
+   }
+
    bloom_filter_unref(filter);
 }
 
