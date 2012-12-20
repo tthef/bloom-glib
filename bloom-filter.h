@@ -30,7 +30,7 @@ struct _BloomFilter
    /*< private >*/
    gint       ref_count;
    GPtrArray *hash_funcs;
-   gint       width;
+   gsize      width;
    guint8     data[0];
 };
 
