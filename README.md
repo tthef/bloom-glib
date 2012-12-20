@@ -21,12 +21,13 @@ filter = bloom_filter_new(2048 /* bits */,
                           g_str_hash);
 
 /* populate your bloom filter */
-bloom_filter_insert(filter, "some key");
+bloom_filter_insert(filter, "1234");
 
 /* ... */
 
-if (bloom_filter_contains(filter, "some key")) {
+if (!bloom_filter_contains(filter, "4321")) {
     /* do some long running work */
+    bloom_filter_insert(filter, "4321");
 }
 
 bloom_filter_unref(filter);
