@@ -42,7 +42,7 @@ BloomFilter *bloom_filter_new      (gsize        width,
 BloomFilter *bloom_filter_ref      (BloomFilter *filter);
 void         bloom_filter_unref    (BloomFilter *filter);
 
-static inline gboolean
+G_INLINE_FUNC gboolean
 bloom_filter_get_bit (BloomFilter *filter,
                       gsize        bit)
 {
@@ -51,7 +51,7 @@ bloom_filter_get_bit (BloomFilter *filter,
    return !!(filter->data[bit >> 3] & (1 << (bit & 0x7)));
 }
 
-static inline void
+G_INLINE_FUNC void
 bloom_filter_set_bit (BloomFilter *filter,
                       gsize        bit)
 {
@@ -60,7 +60,7 @@ bloom_filter_set_bit (BloomFilter *filter,
    filter->data[bit >> 3] |= (1 << (bit & 0x7));
 }
 
-static inline void
+G_INLINE_FUNC void
 bloom_filter_insert (BloomFilter   *filter,
                      gconstpointer  key)
 {
@@ -75,7 +75,7 @@ bloom_filter_insert (BloomFilter   *filter,
    }
 }
 
-static inline gboolean
+G_INLINE_FUNC gboolean
 bloom_filter_contains (BloomFilter   *filter,
                        gconstpointer  key)
 {
