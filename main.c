@@ -74,6 +74,32 @@ test2 (void)
    bloom_filter_unref(filter);
 }
 
+static void
+test3 (void)
+{
+   BloomFilter *filter;
+   guint i;
+   static const gchar *strings[] = {
+      "abcdef",
+      "ghijkl",
+      "mnopqr",
+      "stuvwx",
+      "yz",
+      "012345",
+      "6789",
+   };
+
+   filter = bloom_filter_new_murmur(2048, -1, 4);
+
+   for (i = 0; i < G_N_ELEMENTS(strings); i++) {
+      g_assert(!bloom_filter_contains(filter, strings[i]));
+      bloom_filter_insert(filter, strings[i]);
+      g_assert(bloom_filter_contains(filter, strings[i]));
+   }
+
+   bloom_filter_unref(filter);
+}
+
 gint
 main (gint   argc,
       gchar *argv[])
@@ -81,5 +107,6 @@ main (gint   argc,
    g_test_init(&argc, &argv, NULL);
    g_test_add_func("/BloomFilter/g_str_hash", test1);
    g_test_add_func("/BloomFilter/g_str_hash+djb_hash", test2);
+   g_test_add_func("/BloomFilter/murmurhas3", test3);
    return g_test_run();
 }
