@@ -120,9 +120,10 @@ murmur_hash3_x86_32 (gconstpointer key, int len, guint32 seed)
 }
 
 BloomFilter *
-bloom_filter_new_full (gsize     width,
-                       guint     n_hash_funcs,
-                       GHashFunc first_hash_func,
+bloom_filter_new_full (gsize         width,
+                       gint          key_len,
+                       guint         n_hash_funcs,
+                       BloomHashFunc first_hash_func,
                        ...)
 {
    BloomFilter *filter;
@@ -131,11 +132,12 @@ bloom_filter_new_full (gsize     width,
 
    g_return_val_if_fail(width, NULL);
    g_return_val_if_fail(n_hash_funcs, NULL);
-   g_return_val_if_fail(first_hash_func, NULL);
 
    filter = g_malloc0(sizeof *filter + (width / CHAR_BIT) + 1);
    filter->ref_count = 1;
    filter->width = width;
+   filter->key_len = key_len;
+
    filter->hash_funcs = g_ptr_array_new();
    g_ptr_array_add(filter->hash_funcs, first_hash_func);
 

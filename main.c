@@ -29,7 +29,7 @@ test1 (void)
       "6789",
    };
 
-   filter = bloom_filter_new_full(2048, 1, g_str_hash);
+   filter = bloom_filter_new_full(2048, -1, 1, (BloomHashFunc)g_str_hash);
 
    for (i = 0; i < G_N_ELEMENTS(strings); i++) {
       g_assert(!bloom_filter_contains(filter, strings[i]));
@@ -61,7 +61,9 @@ test2 (void)
       "6789",
    };
 
-   filter = bloom_filter_new_full(2048, 2, g_str_hash, djb_hash);
+   filter = bloom_filter_new_full(2048, -1, 2,
+                                  (BloomHashFunc)g_str_hash,
+                                  (BloomHashFunc)djb_hash);
 
    for (i = 0; i < G_N_ELEMENTS(strings); i++) {
       g_assert(!bloom_filter_contains(filter, strings[i]));

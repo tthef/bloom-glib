@@ -31,14 +31,18 @@ struct _BloomFilter
    gint       ref_count;
    GPtrArray *hash_funcs;
    gsize      width;
+   gint       key_len;
    guint8     data[0];
 };
 
+typedef guint32 (*BloomHashFunc) (gconstpointer key, int len, guint32 seed);
+
 void         bloom_filter_remove_all (BloomFilter *filter);
 GType        bloom_filter_get_type   (void) G_GNUC_CONST;
-BloomFilter *bloom_filter_new_full   (gsize        width,
-                                      guint        n_hash_funcs,
-                                      GHashFunc    first_hash_func,
+BloomFilter *bloom_filter_new_full   (gsize         width,
+                                      gint          key_len,
+                                      guint         n_hash_funcs,
+                                      BloomHashFunc first_hash_func,
                                       ...);
 BloomFilter *bloom_filter_ref        (BloomFilter *filter);
 void         bloom_filter_unref      (BloomFilter *filter);
@@ -65,14 +69,16 @@ G_INLINE_FUNC void
 bloom_filter_insert (BloomFilter   *filter,
                      gconstpointer  key)
 {
-   GHashFunc hash_func;
+   BloomHashFunc hash_func;
    guint i;
+   guint32 seed = 0;
 
    g_return_if_fail(filter);
 
    for (i = 0; i < filter->hash_funcs->len; i++) {
-      hash_func = g_ptr_array_index(filter->hash_funcs, i);
-      bloom_filter_set_bit(filter, hash_func(key) % filter->width);
+     hash_func = g_ptr_array_index(filter->hash_funcs, i);
+     seed = hash_func(key, filter->key_len, seed);
+     bloom_filter_set_bit(filter, seed % filter->width);
    }
 }
 
@@ -80,14 +86,16 @@ G_INLINE_FUNC gboolean
 bloom_filter_contains (BloomFilter   *filter,
                        gconstpointer  key)
 {
-   GHashFunc hash_func;
+   BloomHashFunc hash_func;
    guint i;
+   guint32 seed = 0;
 
    g_return_val_if_fail(filter, FALSE);
 
    for (i = 0; i < filter->hash_funcs->len; i++) {
       hash_func = g_ptr_array_index(filter->hash_funcs, i);
-      if (!bloom_filter_get_bit(filter, hash_func(key) % filter->width)) {
+      seed = hash_func(key, filter->key_len, seed);
+      if (!bloom_filter_get_bit(filter, seed % filter->width)) {
          return FALSE;
       }
    }
