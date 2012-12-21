@@ -22,10 +22,10 @@
 #include "bloom-filter.h"
 
 BloomFilter *
-bloom_filter_new (gsize     width,
-                  guint     n_hash_funcs,
-                  GHashFunc first_hash_func,
-                  ...)
+bloom_filter_new_full (gsize     width,
+                       guint     n_hash_funcs,
+                       GHashFunc first_hash_func,
+                       ...)
 {
    BloomFilter *filter;
    va_list args;

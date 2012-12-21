@@ -36,7 +36,7 @@ struct _BloomFilter
 
 void         bloom_filter_remove_all (BloomFilter *filter);
 GType        bloom_filter_get_type   (void) G_GNUC_CONST;
-BloomFilter *bloom_filter_new        (gsize        width,
+BloomFilter *bloom_filter_new_full   (gsize        width,
                                       guint        n_hash_funcs,
                                       GHashFunc    first_hash_func,
                                       ...);
