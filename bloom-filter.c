@@ -21,6 +21,104 @@
 
 #include "bloom-filter.h"
 
+/*
+ * MurmurHash3, written by Austin Appleby, and placed in the public
+ * domain.
+ *
+ * http://code.google.com/p/smhasher/source/browse/trunk/MurmurHash3.cpp
+ *
+ * Extracted MurmurHash3_x86_32 (without the MSVC specifics), changed types to
+ * glib types, gave it a return value, assume 0-terminated if len == -1
+ */
+
+static inline guint32
+rotl32 (guint32 x, gint8 r)
+{
+  return (x << r) | (x >> (32 - r));
+}
+
+#define ROTL32(x,y) rotl32(x,y)
+
+/*
+ * Block read - if your platform needs to do endian-swapping or can only
+ * handle aligned reads, do the conversion here
+ *
+ * NB: original uses __attribute__((always_inline)), but this generates a
+ *     warning with gcc, and since -Werror is on ...
+ */
+static inline guint32
+getblock (const guint32 * p, int i)
+{
+  return p[i];
+}
+
+/*
+ * Finalization mix - force all bits of a hash block to avalanche
+ *
+ * NB: original uses __attribute__((always_inline)), but this generates a
+ *     warning with gcc, and since -Werror is on ...
+ */
+static inline guint32
+fmix (guint32 h)
+{
+  h ^= h >> 16;
+  h *= 0x85ebca6b;
+  h ^= h >> 13;
+  h *= 0xc2b2ae35;
+  h ^= h >> 16;
+
+  return h;
+}
+
+static guint32
+murmur_hash3_x86_32 (gconstpointer key, int len, guint32 seed)
+{
+  const guint8 *data = (const guint8 *)key;
+  const guint8 *tail;
+  const guint32 c1 = 0xcc9e2d51;
+  const guint32 c2 = 0x1b873593;
+  const guint32 *blocks;
+  int i, nblocks;
+  guint32 h1 = seed;
+  guint32 k1;
+
+  if (len < 0)
+    len = strlen ((const char*)key);
+
+  nblocks = len / 4;
+  blocks = (const guint32 *)(data + nblocks*4);
+
+  for(i = -nblocks; i; i++)
+  {
+    k1 = getblock(blocks,i);
+
+    k1 *= c1;
+    k1 = ROTL32(k1,15);
+    k1 *= c2;
+
+    h1 ^= k1;
+    h1 = ROTL32(h1,13);
+    h1 = h1*5+0xe6546b64;
+  }
+
+  tail = (const guint8*)(data + nblocks*4);
+  k1 = 0;
+
+  switch(len & 3)
+    {
+    case 3: k1 ^= tail[2] << 16;
+    case 2: k1 ^= tail[1] << 8;
+    case 1: k1 ^= tail[0];
+      k1 *= c1; k1 = ROTL32(k1,15); k1 *= c2; h1 ^= k1;
+    };
+
+  h1 ^= len;
+
+  h1 = fmix(h1);
+
+  return h1;
+}
+
 BloomFilter *
 bloom_filter_new_full (gsize     width,
                        guint     n_hash_funcs,
