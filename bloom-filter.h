@@ -44,6 +44,10 @@ BloomFilter *bloom_filter_new_full   (gsize         width,
                                       guint         n_hash_funcs,
                                       BloomHashFunc first_hash_func,
                                       ...);
+BloomFilter *bloom_filter_new_murmur  (gsize width,
+                                       gint  key_len,
+                                       guint n_hash_funcs);
+
 BloomFilter *bloom_filter_ref        (BloomFilter *filter);
 void         bloom_filter_unref      (BloomFilter *filter);
 

@@ -139,15 +139,31 @@ bloom_filter_new_full (gsize         width,
    filter->key_len = key_len;
 
    filter->hash_funcs = g_ptr_array_new();
-   g_ptr_array_add(filter->hash_funcs, first_hash_func);
 
-   va_start(args, first_hash_func);
-   for (i = 1; i < n_hash_funcs; i++) {
-      g_ptr_array_add(filter->hash_funcs, va_arg(args, GHashFunc));
+   if (first_hash_func) {
+     g_ptr_array_add(filter->hash_funcs, first_hash_func);
+
+     va_start(args, first_hash_func);
+     for (i = 1; i < n_hash_funcs; i++) {
+       g_ptr_array_add(filter->hash_funcs, va_arg(args, BloomHashFunc));
+     }
+     va_end(args);
+   } else {
+     for(i = 0;  i < n_hash_funcs; i++) {
+       g_ptr_array_add(filter->hash_funcs, murmur_hash3_x86_32);
+     }
    }
-   va_end(args);
 
    return filter;
+}
+
+BloomFilter *
+bloom_filter_new_murmur (gsize width, gint key_len, guint n_hash_funcs)
+{
+  BloomFilter *filter;
+
+  filter = bloom_filter_new_full (width, key_len, n_hash_funcs, NULL);
+  return filter;
 }
 
 void
@@ -173,8 +189,8 @@ bloom_filter_unref (BloomFilter *filter)
    g_return_if_fail(filter->ref_count > 0);
 
    if (g_atomic_int_dec_and_test(&filter->ref_count)) {
-      g_ptr_array_unref(filter->hash_funcs);
-      g_free(filter);
+       g_ptr_array_unref(filter->hash_funcs);
+       g_free(filter);
    }
 }
 
